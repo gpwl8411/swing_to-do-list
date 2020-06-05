@@ -1,4 +1,3 @@
-
 package todo.gui.view;
 
 import static todo.common.GuiUtil.changePanel;
@@ -15,10 +14,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -31,6 +33,11 @@ import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
+import net.sourceforge.jdatepicker.impl.DateComponentFormatter;
+import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
+import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
+import net.sourceforge.jdatepicker.impl.UtilDateModel;
+import todo.gui.controller.TodoListComparator;
 import todo.gui.io.ListIO;
 import todo.gui.model.vo.CheckListItem;
 import todo.gui.model.vo.TodoList;
@@ -39,6 +46,7 @@ public class TodoListFrame extends JFrame {
 
 	private ListIO listIO = new ListIO();
 	private String priority;
+	private Date selectedDate = null;
 	private static JList<CheckListItem> ingList;
 	private static JList<CheckListItem> edList;
 	private static DefaultListModel<CheckListItem> ingmodel;
@@ -48,17 +56,22 @@ public class TodoListFrame extends JFrame {
 
 	public TodoListFrame() {
 		
-		init(this, 300, 300, 700, 700);
+		//윈도우 화면 어디에 띄울래?
+		init(this, 150, 50, 800, 700);
 		this.addWindowListener(new WindowEventTest());
-
+		
+		//프로그램 네이밍창
+		setTitle("ToDoList");
+		
 		/**
 		 * 메인 리스트 확인 패널
 		 */
 
-		// 할일과 환료한 힐 패널 두개가 들어있는 패널
+		// 할일과 완료한 일 패널 두개가 들어있는 패널
 		JPanel mainpanel = new JPanel();
 		mainpanel.setLayout(new GridLayout(2,1,10,3));
-		mainpanel.setBounds(0, 0, 700, 700);
+		mainpanel.setBounds(0, 0, 1920, 1080);
+		mainpanel.setBackground(new Color(250, 222, 255));
 		
 		//할일, 완료한 일 담는 리스트와 해당 리스트를 제어할 모델설정
 		ingList = new JList(new DefaultListModel<CheckListItem>());
@@ -68,82 +81,100 @@ public class TodoListFrame extends JFrame {
 		
 		//폰트변경
 		Font f1 = new Font("돋움", Font.BOLD, 20);
-		ingList.setFont(f1);
-		ingList.setBackground(Color.lightGray);
+		Font f2 = new Font("휴먼매직체", Font.BOLD, 40);
+		
 		
 		
 
 		// 할일 확인 패널
-		ingpanel = new JPanel();
-//		 ingpanel.setLayout(null);
-		ingpanel.setBounds(0, 0, 700, 300);
-		ingpanel.setBackground(Color.gray);
-
-		JLabel dolabel = new JLabel("할 일");
-		dolabel.setBounds(10, 10, 100, 50);
+		JPanel ingpanel = new JPanel();
+		ingpanel.setLayout(null); 
+		ingpanel.setBounds(0, 100, 1920, 1080); 
+		ingpanel.setBackground(new Color(250, 222, 255));
+	
+		//할일제목라벨
+		JLabel dolabel = new JLabel("해야할 일");
+		dolabel.setBounds(50, 0, 300, 100);
 		ingpanel.add(dolabel);
-
-		// 할일 추가,삭제 버튼
+		dolabel.setFont(f2);
+		
+		 //할일 추가,삭제 버튼
 		JButton goAdd = new JButton("할일추가");
-		goAdd.setBounds(500, 10, 100, 50);
+		goAdd.setBounds(350, 20, 90, 50);
 		ingpanel.add(goAdd);
 		
-		JButton delete = new JButton("전체삭제");
-		goAdd.setBounds(500, 10, 100, 50);
-		ingpanel.add(delete);
+		JButton ingdelete = new JButton("할일 전체삭제");
+		ingdelete.setBounds(450, 20, 150, 50);
+		ingpanel.add(ingdelete);
+		
+		//날짜순 리스트 정렬 버튼
+		JButton sort = new JButton("날짜순 정렬");
+		sort.setBounds(610, 20, 110, 50);
+		ingpanel.add(sort);
 		
 
-		// list가져오기
+		// list가져오기 , 출력
 		setList(ingpanel, "ing", "inglist.dat");
+		ingList.setLayout(null);
+		ingList.setBounds(0, 100, 1920, 1080);
+		ingList.setBackground(new Color(250, 240, 255));
+		ingList.setFont(f1);
 
+		
 		// 완료한 일 확인 패널
-		edpanel = new JPanel();
-		// edpanel.setLayout(null);
-		edpanel.setBounds(0, 300, 700, 400);
-
+		JPanel edpanel = new JPanel();
+		edpanel.setLayout(null);
+		edpanel.setBounds(0, 300, 1920, 1080);
+		edpanel.setBackground(new Color(250, 222, 255));		
+		
 		JLabel edlabel = new JLabel("완료한 일");
-		edlabel.setBounds(10, 310, 100, 50);
+		edlabel.setBounds(50, 0, 300, 100);
 		edpanel.add(edlabel);
+		edlabel.setFont(f2);
+		
+		JButton eddelete = new JButton("완료한 일 전체삭제");
+		eddelete.setBounds(450, 0, 150, 50);
+		edpanel.add(eddelete);
 
+		
 		// list가져오기
 		setList(edpanel, "ed", "edlist.dat");
-
+		edList.setLayout(null);
+		edList.setBounds(0, 100, 1920, 1080);
+		edList.setBackground(new Color(250, 240, 255));
+		edList.setFont(f1);
+		
+		
 		mainpanel.add(ingpanel);
 		mainpanel.add(edpanel);
 		
-		//스크롤 설정
-//		JScrollPane ingscroll = new JScrollPane();
-//		ingscroll.setViewportView(ingList);
-//		
-//		JScrollPane edscroll = new JScrollPane();
-//		edscroll.setViewportView(edList);
-//		
-//		ingpanel.add(ingscroll);
-//		edpanel.add(edscroll);
-		
 		//delete button listener
-		delete.addActionListener(new ActionListener() {
+		ingdelete.addMouseListener(new DeleteListListener("ing"));
+		eddelete.addMouseListener(new DeleteListListener("ed"));
+		
+		// sort button listener
+		sort.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-//				if (priority == null) {
-//					// 경고메세지 출력
-//					JOptionPane.showMessageDialog(null, "할일을 입력해주세요.");
-//					return;
-//				}
-
-				// 리스트와 우선순위를 파일저장하도록 요청
-//				TodoList vo = new TodoList(doText.getText(), priority);
-//				CheckListItem cvo = new CheckListItem(vo);
-				// listIO.saveList(vo);
-
-				JOptionPane.showMessageDialog(null, "정상적으로 삭제되었습니다.");
-//				doText.setText("할일을 입력해주세요.");
-				removeList(ingmodel);
+				//해야할 일 리스트 정렬
+				List<CheckListItem> clist = Collections.list(ingmodel.elements());
+				Collections.sort(clist, new TodoListComparator());
+				ingmodel.removeAllElements();
+				for(CheckListItem c : clist){
+					ingmodel.addElement(c);
+					
+				}
+				//완료한 일 리스트 정렬
+				List<CheckListItem> clist2 = Collections.list(edmodel.elements());
+				Collections.sort(clist2, new TodoListComparator());
+				edmodel.removeAllElements();
+				for(CheckListItem c : clist2){
+					edmodel.addElement(c);
+					
+				}
 			}
 		});
-		
 
 		// list listener등록
 		CheckClickListener ingListener = new CheckClickListener(ingmodel, edmodel);
@@ -156,40 +187,48 @@ public class TodoListFrame extends JFrame {
 		 */
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
+		panel.setBackground(new Color(250, 240, 255));
 
-		JLabel label = new JLabel("할일 1");
-		label.setBounds(10, 50, 500, 20);
 
-		JButton cancel = new JButton("취소");
-		cancel.setBounds(550, 400, 70, 70);
+		JLabel label = new JLabel("할일입력");
+		label.setBounds(10, 50, 90, 20);
+		label.setHorizontalAlignment(JLabel.CENTER);
+		
 
 		JTextField doText = new JTextField();
-		doText.setBounds(100, 50, 500, 20);
-
-		JButton addDo = new JButton("등록");
-		addDo.setBounds(450, 400, 70, 70);
-
-		JButton btn2 = new JButton("달력");
-		btn2.setBounds(620, 50, 60, 50);
+		doText.setBounds(100, 50, 400, 200);
 		
-		btn2.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-	
-			}
-		});
+		JLabel dateLabel = new JLabel("날짜 선택");
+		dateLabel.setBounds(600, 50, 60, 50);
+		UtilDateModel model = new UtilDateModel();
+		JDatePanelImpl datePanel = new JDatePanelImpl(model);
+		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateComponentFormatter());
+		datePicker.setBounds(600, 90, 100, 50);
+
+		ImageIcon back = new ImageIcon("images/back.jpg");
+		JButton cancel = new JButton(back);
+		cancel.setBounds(450, 400, 70, 70);
+
+		ImageIcon Ok = new ImageIcon("images/ok.jpg");
+		JButton addDo = new JButton(Ok);
+		addDo.setBounds(350, 400, 70, 70);
+		
 
 		JPanel abc = new JPanel();
+		abc.setBackground(new Color(250, 240, 255));
 
 		JRadioButton high = new JRadioButton("높음");
+		high.setBackground(new Color(250, 240, 255));
 		JRadioButton medium = new JRadioButton("보통");
+		medium.setBackground(new Color(250, 240, 255));
 		JRadioButton low = new JRadioButton("낮음");
+		low.setBackground(new Color(250, 240, 255));
 
 		abc.setBounds(200, 250, 200, 50);
 		abc.add(high);
 		abc.add(medium);
 		abc.add(low);
+		
 
 		ButtonGroup group = new ButtonGroup();
 		group.add(high);
@@ -197,11 +236,14 @@ public class TodoListFrame extends JFrame {
 		group.add(low);
 
 		panel.add(abc);
-		panel.add(btn2);
+//		panel.add(btn2);
+		panel.add(datePicker);
 		panel.add(cancel);
 		panel.add(addDo);
 		panel.add(label);
 		panel.add(doText);
+		panel.add(dateLabel);
+		
 
 		// 우선순위 선택 라디오 버튼
 		ActionListener listener = new ActionListener() {
@@ -219,27 +261,45 @@ public class TodoListFrame extends JFrame {
 		low.addActionListener(listener);
 
 		// 등록버튼
-		addDo.addActionListener(new ActionListener() {
+				addDo.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						selectedDate = (Date) datePicker.getModel().getValue();
+						
+						if(doText.getText().length()>=15){
+							// 경고메세지 출력
+							JOptionPane.showMessageDialog(null, "최대 15글자까지 입력가능합니다.");
+							return;
+						}
+						if (doText.getText() == null) {
+							// 경고메세지 출력
+							JOptionPane.showMessageDialog(null, "할 일을 입력해주세요.");
+							return;
+						}
+						if (priority == null) {
+							// 경고메세지 출력
+							JOptionPane.showMessageDialog(null, "우선순위를 선택해주세요.");
+							return;
+						}
+						if(selectedDate ==null){
+							// 경고메세지 출력
+							JOptionPane.showMessageDialog(null, "날짜를 선택해주세요.");
+							return;
+						}
+						
 
-				if (priority == null) {
-					// 경고메세지 출력
-					JOptionPane.showMessageDialog(null, "할일을 입력해주세요.");
-					return;
-				}
+						// 리스트와 우선순위 날짜를 파일저장하도록 요청
+						TodoList vo = new TodoList(doText.getText(), priority, selectedDate);
+						CheckListItem cvo = new CheckListItem(vo);
+						// listIO.saveList(vo);
 
-				// 리스트와 우선순위를 파일저장하도록 요청
-				TodoList vo = new TodoList(doText.getText(), priority);
-				CheckListItem cvo = new CheckListItem(vo);
-				// listIO.saveList(vo);
-
-				JOptionPane.showMessageDialog(null, "정상적으로 등록되었습니다.");
-				doText.setText("할일을 입력해주세요.");
-				addList(ingmodel, cvo);
-			}
-		});
+						JOptionPane.showMessageDialog(null, "정상적으로 등록되었습니다.");
+						doText.setText("할일을 입력해주세요.");
+						group.clearSelection();
+						addList(ingmodel, cvo);
+					}
+				});
 
 		/**
 		 * main <-> 등록
@@ -251,6 +311,7 @@ public class TodoListFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				changePanel(TodoListFrame.this, mainpanel, panel);
 
+				
 			}
 		});
 
@@ -265,6 +326,7 @@ public class TodoListFrame extends JFrame {
 
 		});
 
+		
 		add(mainpanel);
 		setVisible(true);
 
@@ -337,16 +399,41 @@ public class TodoListFrame extends JFrame {
 	public void removeList(DefaultListModel<CheckListItem> model) {
 			model.removeAllElements();
 	}
+	//list 전체 삭제 클릭시 이벤트 리스너
+	public class DeleteListListener extends MouseAdapter{
+		
+		String type;
+		DeleteListListener(String type){
+			this.type = type;
+		}
 
+		@Override
+		public void mouseClicked(MouseEvent event) {
+			
+			JOptionPane.showMessageDialog(null, "정상적으로 삭제되었습니다.");
+			if(type=="ing"){				
+				removeList(ingmodel);
+			}else{
+				removeList(edmodel);
+			}
+		}
+	}
+	//list체크박스 체크시클릭시 이벤트 리스너
 	public class CheckClickListener extends MouseAdapter {
 
 		DefaultListModel<CheckListItem> model;
 		DefaultListModel<CheckListItem> otherModel;
+		String checkText;
 
 		CheckClickListener(DefaultListModel<CheckListItem> model, DefaultListModel<CheckListItem> otherModel) {
 
 			this.model = model;
 			this.otherModel = otherModel;
+			if(model==ingmodel){
+				checkText ="완료 리스트에 옮기시겠습니까?";
+			}else{
+				checkText ="할 일 리스트에 옮기시겠습니까?";
+			}
 
 		}
 
@@ -356,13 +443,24 @@ public class TodoListFrame extends JFrame {
 			int index = list.locationToIndex(event.getPoint());// Get index
 																// of item
 																// clicked
-			CheckListItem item = (CheckListItem) list.getModel().getElementAt(index);
-			item.setSelected(!item.isSelected()); // Toggle selected state
-			list.repaint(list.getCellBounds(index, index));// Repaint cell
-			System.out.println(item.getList());
-			removeList(model, item);
-			addList(otherModel, item);
-
+			int result = JOptionPane.showConfirmDialog(ingList, checkText,"체크",JOptionPane.
+					YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
+			if (result == JOptionPane.CLOSED_OPTION){
+				dispose();
+				return;
+			}
+			else if (result == JOptionPane.YES_OPTION){
+				
+				CheckListItem item = (CheckListItem) list.getModel().getElementAt(index);
+				item.setSelected(!item.isSelected()); // Toggle selected state
+				list.repaint(list.getCellBounds(index, index));// Repaint cell
+				System.out.println(item.getList());
+				removeList(model, item);
+				addList(otherModel, item);
+				
+			}
+			
+			
 		}
 	}
 
@@ -403,4 +501,3 @@ class CheckListRenderer extends JCheckBox implements ListCellRenderer<Object> {
 		return this;
 	}
 }
-

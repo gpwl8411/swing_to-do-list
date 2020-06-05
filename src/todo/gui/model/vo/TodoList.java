@@ -1,6 +1,7 @@
 package todo.gui.model.vo;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class TodoList implements Serializable{
 
@@ -12,16 +13,25 @@ public class TodoList implements Serializable{
 	
 	private String doText;
 	private String priority;
-	
+	private Date date;
 	
 	public TodoList() {
 		doText = "입력한 리스트가 없습니다.";
 	}
 
-	public TodoList(String doText, String priority) {
+	public TodoList(String doText, String priority,Date date) {
 		super();
 		this.doText = doText;
 		this.priority = priority;
+		this.date =date;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	public String getDoText() {
