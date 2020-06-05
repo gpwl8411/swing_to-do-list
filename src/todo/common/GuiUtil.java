@@ -4,7 +4,6 @@ package todo.common;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import todo.gui.view.AddListFrame;
 
 public class GuiUtil {
 

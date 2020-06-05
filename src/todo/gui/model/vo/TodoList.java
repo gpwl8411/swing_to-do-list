@@ -9,10 +9,13 @@ public class TodoList implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -3624519636836880974L;
-	String doText;
-	String priority;
+	
+	private String doText;
+	private String priority;
+	
 	
 	public TodoList() {
+		doText = "입력한 리스트가 없습니다.";
 	}
 
 	public TodoList(String doText, String priority) {
@@ -41,6 +44,19 @@ public class TodoList implements Serializable{
 	public String toString(){
 		return "todolsit : "+doText+" , priority : "+priority;
 	}
-	
+	@Override
+	public boolean equals(Object obj){
+		if(obj instanceof TodoList){
+			TodoList todolist = (TodoList) obj;
+			return(doText.equals(todolist.doText) && priority.equals(todolist.getPriority()));
+		}else{
+			return false;
+		}
+	}
+//	@Override
+//	public int hashCode(){
+//		final int prime = 31;
+//		return *prime;
+//	}
 	
 }
