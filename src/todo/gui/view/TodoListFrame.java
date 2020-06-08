@@ -57,7 +57,7 @@ public class TodoListFrame extends JFrame {
 	public TodoListFrame() {
 		
 		//윈도우 화면 어디에 띄울래?
-		init(this, 150, 50, 800, 700);
+		init(this, 150, 50, 850, 700);
 		this.addWindowListener(new WindowEventTest());
 		
 		//프로그램 네이밍창
@@ -80,7 +80,7 @@ public class TodoListFrame extends JFrame {
 		edmodel = (DefaultListModel<CheckListItem>) edList.getModel();
 		
 		//폰트변경
-		Font f1 = new Font("돋움", Font.BOLD, 20);
+		Font f1 = new Font("굴림", Font.BOLD, 20);
 		Font f2 = new Font("휴먼매직체", Font.BOLD, 40);
 		
 		
@@ -272,7 +272,7 @@ public class TodoListFrame extends JFrame {
 							JOptionPane.showMessageDialog(null, "최대 15글자까지 입력가능합니다.");
 							return;
 						}
-						if (doText.getText() == null) {
+						if (doText.getText() == null || doText.getText().length()==0) {
 							// 경고메세지 출력
 							JOptionPane.showMessageDialog(null, "할 일을 입력해주세요.");
 							return;
@@ -288,7 +288,6 @@ public class TodoListFrame extends JFrame {
 							return;
 						}
 						
-
 						// 리스트와 우선순위 날짜를 파일저장하도록 요청
 						TodoList vo = new TodoList(doText.getText(), priority, selectedDate);
 						CheckListItem cvo = new CheckListItem(vo);
@@ -298,6 +297,10 @@ public class TodoListFrame extends JFrame {
 						doText.setText("할일을 입력해주세요.");
 						group.clearSelection();
 						addList(ingmodel, cvo);
+						//초기화
+						priority=null;
+						selectedDate=null;
+						
 					}
 				});
 
@@ -352,6 +355,7 @@ public class TodoListFrame extends JFrame {
 				for (int i = 0; i < loadlist.size(); i++) {
 					checkList[i] = new CheckListItem(loadlist.get(i));
 					ingmodel.addElement(checkList[i]);
+//					System.out.println(checkList[i]);
 	
 				}
 			}
@@ -370,6 +374,7 @@ public class TodoListFrame extends JFrame {
 				for (int i = 0; i < loadlist.size(); i++) {
 					checkList[i] = new CheckListItem(loadlist.get(i));
 					edmodel.addElement(checkList[i]);
+//					System.out.println(checkList[i]);
 
 				}
 			}
@@ -429,16 +434,23 @@ public class TodoListFrame extends JFrame {
 
 			this.model = model;
 			this.otherModel = otherModel;
-			if(model==ingmodel){
-				checkText ="완료 리스트에 옮기시겠습니까?";
-			}else{
-				checkText ="할 일 리스트에 옮기시겠습니까?";
-			}
+			
+				if(model==ingmodel){
+					checkText ="완료 리스트에 옮기시겠습니까?";
+				}else{
+					checkText ="할 일 리스트에 옮기시겠습니까?";
+				}
+			
+			
 
 		}
 
 		@Override
 		public void mouseClicked(MouseEvent event) {
+			//옮길 리스트가 없을 경우 리턴
+			if(model.size()==0) return;
+			
+			//리스트가 있을경우 이동 처리해 줌
 			JList list = (JList) event.getSource();
 			int index = list.locationToIndex(event.getPoint());// Get index
 																// of item

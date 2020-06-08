@@ -34,7 +34,9 @@ public class CheckListItem {
 	public String toString() {
 		SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String date = transFormat.format(list.getDate());
-
-		return String.format("%-20s%20s%20s", "메모 : "+list.getDoText(),"  "+date,"  우선순위 : "+list.getPriority()) ;
+		
+		return String.format("%-20s%-20s%-20s","   "+date,"  우선순위 : "+list.getPriority(),list.getDoText()) ;
 	}
+
+
 }
